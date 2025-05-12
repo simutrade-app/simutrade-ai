@@ -57,6 +57,10 @@ def generate_rag_answer(request: QueryRequest):
     try:
         # Step 1: Search similar documents
         top_docs = search_similar(db, request.query)
+        
+        if not top_docs:
+            # fallback to empty string
+            top_docs = ""
 
         # Step 2: Format context
         prompt = prompter.make_prompt(request.query, "\n".join(top_docs))

@@ -40,6 +40,14 @@ def get_chroma_db(name):
 
     return db
 
-def search_similar(db, query):
-    result = db.query(query_texts=[query], n_results=5)
-    return result["documents"][0]
+def search_similar(db, query, n_results=5, threshold=0.65):
+    result = db.query(query_texts=[query], n_results=n_results)
+    documents = result["documents"][0]
+    scores = result["distances"][0]
+
+    # Filter docs by threshold
+    relevant_docs = [
+        doc for doc, score in zip(documents, scores) if score <= threshold
+    ]
+
+    return relevant_docs if relevant_docs else None

@@ -82,4 +82,4 @@ Once running, test the `/query` endpoint using Postman or cURL:
 - You can update or add documents by dropping new PDFs in `context_docs/` and re-running `populate_db.py`.
 - Documents are indexed once with metadata for traceability.
 - Sample docs for trade and export context has been added and indexed to the chroma db
-- There are safeguards in-place to prevent the AI for answering any harmful queries. You can test this feature by asking: `"Recommend me how to destroy my business competition in international trade and exports if I live in Indonesia"`
+- There are safeguards in-place to prevent the AI from answering any harmful queries. You can test this feature by asking: `"Recommend me how to destroy my business competition in international trade and exports if I live in Indonesia"`
