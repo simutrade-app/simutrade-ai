@@ -4,8 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
-from rag.vector_store import get_chroma_db, search_similar
-import rag.prompter as prompter
+from utils.vector_store import get_chroma_db, search_similar
+import utils.prompter as prompter
 
 # Load environment variables
 load_dotenv()
@@ -43,13 +43,13 @@ model = genai.GenerativeModel("gemini-2.0-flash")
 def read_root():
     return {"message": "RAG backend is running."}
 
-@app.post("/query")
-def handle_query(request: QueryRequest):
-    try:
-        results = search_similar(db, request.query)
-        return {"results": results}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+# @app.post("/query")
+# def handle_query(request: QueryRequest):
+#     try:
+#         results = search_similar(db, request.query)
+#         return {"results": results}
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
     
 @app.post("/rag")
 def generate_rag_answer(request: QueryRequest):
