@@ -2,10 +2,28 @@
 def make_prompt(query, relevant_passage):
     escaped = relevant_passage.replace("'", "").replace('"', "")
     
-    prompt = f"""Question: {query}.\n
-    Supplementary Information: {escaped}\n
-    Answer the question according to your knowledge and supplemented with the supplementary information provided. If the question is not within the scope of the supplementary information, you should say "Good Question! But regretfully, this is out of my scope. I will still answer to the best of my knowledge" and then proceed answering only with your knowledge.\n
-    If you refer to the supplementary information, you don't need to say "according to the supplementary information", instead say "according to my augmented knowledge on trade and exports".\n
+    banned_words = [
+        "kill",
+        "bomb",
+        "murder",
+        "destroy",
+        "death",
+    ]
+    
+    prompt = f"""You are an expert in international trade and exports.
+
+    Answer the following question using your expertise, the information provided, and optionally Google Search if it strengthens your answer.
+
+    Avoid answering if the question contains malicious words like {banned_words} or their synonyms—just say: "Sorry, I can't help due to harmful content."
+
+    If the topic is outside the provided info, say: "Good question! This is out of scope, but here's my best answer based on what I know."
+
+    Refer to the supplementary info as "my augmented trade knowledge", not by name.
+
+    Question: {query}
+
+    Supplementary Info: {escaped}
+
     Your response:
     """
     

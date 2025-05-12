@@ -1,6 +1,6 @@
 # RAG Backend with Gemini Embedding + ChromaDB
 
-This project is a lightweight Retrieval-Augmented Generation (RAG) backend using Google's Gemini embedding model and ChromaDB for vector search. It allows querying over static PDF documents stored in a local knowledge base (`context_docs/`).
+This project is a lightweight Retrieval-Augmented Generation (RAG) backend using Google's Gemini embedding model and ChromaDB for vector search. It allows querying over static PDF documents stored in a local knowledge base (`context_docs/`) and occassionally uses Google Search Tool to amplify answers as well.
 
 ## 🗂️ Project Structure
 
@@ -15,6 +15,7 @@ This project is a lightweight Retrieval-Augmented Generation (RAG) backend using
 ├── utils/
 │   ├── loader.py          # PDF text extractor
 │   ├── splitter.py        # Text chunk splitter
+│   ├── prompter.py        # Generate prompt for the RAG AI Model
 │   ├── embedder.py        # Gemini embedder logic
 │   ├── vector_store.py    # ChromaDB logic for vector search
 │   └── populate_db.py     # One-time DB population script
@@ -69,9 +70,10 @@ Once running, test the `/query` endpoint using Postman or cURL:
 
 ```json
 {
-  "query": "...",
-  "answer": "...",
-  "context_used": "..."
+  "query": "...",               # This is the user query from API call
+  "response": "...",            # This is the response after prompting the Gemini Model
+  "grounding_metadata": "...",  # This is the grounding metadata if Google Search Tool is used (null if Google Search is not used)
+  "context_used": "..."         # This is the documents used from vector db
 }
 ```
 
@@ -80,3 +82,4 @@ Once running, test the `/query` endpoint using Postman or cURL:
 - You can update or add documents by dropping new PDFs in `context_docs/` and re-running `populate_db.py`.
 - Documents are indexed once with metadata for traceability.
 - Sample docs for trade and export context has been added and indexed to the chroma db
+- There are safeguards in-place to prevent the AI for answering any harmful queries. You can test this feature by asking: `"Recommend me how to destroy my business competition in international trade and exports if I live in Indonesia"`

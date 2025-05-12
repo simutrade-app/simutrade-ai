@@ -1,13 +1,21 @@
 from chromadb.utils.embedding_functions import EmbeddingFunction
-import google.generativeai as genai
+from google import genai
+from google.genai import types
+from dotenv import load_dotenv
+import os
 
-class GeminiEmbeddingFunction(EmbeddingFunction):
+load_dotenv()
+GOOGLE_API_KEY=os.getenv("GOOGLE_API_KEY")
+
+client = genai.Client(api_key=GOOGLE_API_KEY)
+
+class GeminiEmbeddingFunction(EmbeddingFunction):    
     def __call__(self, input):
-        model = "models/text-embedding-004"
-        title = "Trade and Exports Reports"
-        return genai.embed_content(
+        model = "text-embedding-004"
+        result = client.models.embed_content(
             model=model,
-            content=input,
-            task_type="retrieval_document",
-            title=title
-        )["embedding"]
+            contents=input,
+            config=types.EmbedContentConfig(task_type="RETRIEVAL_DOCUMENT"),
+        )
+        
+        return result.embeddings[0].values

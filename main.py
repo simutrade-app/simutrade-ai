@@ -14,8 +14,12 @@ if not GOOGLE_API_KEY:
     raise ValueError("Missing GOOGLE_API_KEY in .env")
 
 # Set the key for the Gemini API
-import google.generativeai as genai
-genai.configure(api_key=GOOGLE_API_KEY)
+from google import genai
+from google.genai.types import Tool, GenerateContentConfig, GoogleSearch
+client = genai.Client(api_key=GOOGLE_API_KEY)
+model_id = "gemini-2.0-flash"
+
+search_tool = Tool(google_search=GoogleSearch())
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -36,9 +40,6 @@ class QueryRequest(BaseModel):
 # Initialize Chroma DB (done once at startup)
 db = get_chroma_db(name="trade_exports_db")
 
-# Initialize Gemini Model (once on startup)
-model = genai.GenerativeModel("gemini-2.0-flash")
-
 @app.get("/")
 def read_root():
     return {"message": "RAG backend is running."}
@@ -51,7 +52,7 @@ def read_root():
 #     except Exception as e:
 #         raise HTTPException(status_code=500, detail=str(e))
     
-@app.post("/rag")
+@app.post("/query")
 def generate_rag_answer(request: QueryRequest):
     try:
         # Step 1: Search similar documents
@@ -60,11 +61,19 @@ def generate_rag_answer(request: QueryRequest):
         # Step 2: Format context
         prompt = prompter.make_prompt(request.query, "\n".join(top_docs))
 
-        answer = model.generate_content(prompt)
+        response = client.models.generate_content(
+            model=model_id,
+            contents=prompt,
+            config=GenerateContentConfig(
+                tools=[search_tool],
+                response_modalities=["TEXT"],
+            )
+        )
 
         return {
             "query": request.query,
-            "answer": answer.text,
+            "response": response.candidates[0].content.parts,
+            "grounding_metadata": response.candidates[0].grounding_metadata.search_entry_point,
             "context_used": top_docs
         }
 
