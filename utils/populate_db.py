@@ -2,18 +2,11 @@ import os
 from tqdm import tqdm
 import chromadb
 import time
-import google.generativeai as genai
-from dotenv import load_dotenv
 
 from loader import extract_text_from_pdf
 from splitter import split_text
 from embedder import GeminiEmbeddingFunction
 
-load_dotenv()
-
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-
-genai.configure(api_key=GOOGLE_API_KEY)
 DOC_FOLDER = "../context_docs"
 DB_PATH = "../chroma_db"
 embedding_fn = GeminiEmbeddingFunction()
@@ -24,9 +17,10 @@ def populate_db(name):
 
     print("Indexing documents...")
 
+    current_data = db.peek(db.count())
+    sources = {meta.get("source") for meta in current_data["metadatas"] if meta}
+    print(f"Currently Indexed Sources: {sources}")
     for filename in os.listdir(DOC_FOLDER):
-        current_data = db.peek(db.count())
-        sources = {meta.get("source") for meta in current_data["metadatas"] if meta}
         if filename.endswith(".pdf") and filename not in list(sources):
             file_path = os.path.join(DOC_FOLDER, filename)
             print(f"\nProcessing {filename}...")
@@ -44,6 +38,8 @@ def populate_db(name):
                     metadatas={"source": filename}
                 )
                 time.sleep(1)
+            print(f"\Processing {filename} Done ✅")
+            time.sleep(10) # add this to avoid spamming / overloading the google text embedding model
                 
 if __name__ == "__main__":
     populate_db(input("Input the name of the db you want to populate: "))

@@ -12,7 +12,7 @@ def make_prompt(query, relevant_passage):
     
     prompt = f"""You are an expert in international trade and exports.
 
-    Answer the following question using your expertise, the information provided, and do a Google Search if you think it will strengthen your answer.
+    Answer the following question using your expertise, the information provided, and do a Google Search ONLY IF you think it IS NECESSARY to strengthen your answer.
 
     Avoid answering if the question contains malicious words like {banned_words} or their synonyms—just say: "Sorry, I can't help due to harmful content."
 

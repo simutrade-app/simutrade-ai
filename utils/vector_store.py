@@ -18,13 +18,15 @@ def get_chroma_db(name):
     if db.count() == 0: # Just in case db is empty on startup
         print("Indexing documents...")
 
+        current_data = db.peek(db.count())
+        sources = {meta.get("source") for meta in current_data["metadatas"] if meta}
+        print(f"Currently Indexed Sources: {sources}")
         for filename in os.listdir(DOC_FOLDER):
-            current_data = db.peek(db.count())
-            sources = {meta.get("source") for meta in current_data["metadatas"] if meta}
             if filename.endswith(".pdf") and filename not in list(sources):
                 file_path = os.path.join(DOC_FOLDER, filename)
                 print(f"\nProcessing {filename}...")
-
+                
+                
                 starting_page = 1 if "[WEB]" in filename else 5
                 text = extract_text_from_pdf(file_path, starting_page=starting_page)
                 chunks = split_text(text)
@@ -37,6 +39,8 @@ def get_chroma_db(name):
                         metadatas={"source": filename}
                     )
                     time.sleep(1)
+                print(f"\Processing {filename} Done ✅")
+                time.sleep(10) # add this to avoid spamming / overloading the google text embedding model
 
     return db
 
